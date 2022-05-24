@@ -59,8 +59,8 @@ def cutoff_sine_fft(y, n, dt, fc_low, fc_high):
     shifted_freq = np.fft.fftshift(freqs)
 
     Fc_amp = np.fft.fft(y)
-    Fc_amp[np.abs(freqs < fc_low)] = 0                  # カットオフ（低周波成分）
-    Fc_amp[np.abs(freqs > fc_high)] = 0                 # カットオフ（高周波成分）
+    Fc_amp[freqs < fc_low] = 0                  # カットオフ（低周波成分）
+    Fc_amp[freqs > fc_high] = 0                 # カットオフ（高周波成分）
     Fc_abs = np.abs(Fc_amp)
     Fc_abs_amp = Fc_abs / n * 2
     Fc_abs_amp[0] = Fc_abs_amp[0] / 2                   # DC成分を2で割る
