@@ -31,31 +31,28 @@ fsz = 18 # define font size just for visualization
 # ====================================
 passed_x = ttime[np.where(spike_waveform > threshold)]      # ピーク検出 thresholdを超えるものを検出
 passed_y = np.tile(2, len(passed_x))
-passed_binary = np.where(spike_waveform > threshold, 1, 0)  # ヒストグラム用にピーク検出する
 
-bin = 20            # binサイズ
-HIST, bins_ = np.histogram(passed_x, bins = 75, range=[-500, 999])
-for i in range(len(HIST)):
-    HIST[i] = HIST[i] * 500/bin
-
-bins_centr = [(bins_[i-1]+bins_[i])/2 for i in range(1, len(bins_))]
-
-m = 0
-for i in HIST:
-    if i > 0:
-        m+=1
-print(m)
-print(len(HIST))
-print(len(bins_centr))
-print(bins_centr[:10])
 
 # ピーク検出 閾値を超えた最初の点で検出
 NN = len(spike_waveform)
 yy = spike_waveform
-yy_prev = np.append(yy[0],yy[0:len(yy)-1] )
+yy_prev = np.append(yy[0],yy[0:len(yy)-1])
 passed_idx = np.where((yy>=threshold) & (yy_prev<threshold))
-# to visualize selected elements, flag on
+# 配列が二重になっていて使いにくいので、１次元に直す
 passed_idx = passed_idx[0]
+
+
+# hist用データの生成
+bbin = 20
+xmin = ttime[0]
+xmax = ttime[-1]
+spike_timing = ttime[passed_idx]
+bins_array = np.arange(xmin - bbin, xmax + bbin, bbin)
+HIST, bins_ = np.histogram(spike_timing, bins=bins_array, range=(xmin, xmax))
+bins_centr = [(bins_[i-1]+bins_[i])/2 for i in range(1, len(bins_))]
+firing_rate = HIST/(bbin/1000)
+print("hist_ : ", len(bins_array))
+
 
 superimpose_x, superimpose_y = [], []
 # ピークポイント±20で切り出す
@@ -94,9 +91,8 @@ ax1.grid()
 ax2 = plt.subplot(mm,nn,2)
 ax2.plot([stimON, stimON], [0, 300],'r--', linewidth = 3)
 ax2.plot([stimOFF, stimOFF], [0, 300],'m--', linewidth = 3)
-# ax2.set_ylim(0, 300)
-# ax2.bar(ttime_bin20, histdata, color = 'b', width = 20)
-ax2.bar(bins_centr, HIST, color = 'b', width = 20)
+ax2.set_yticks(np.arange(0, 301, 50))
+ax2.bar(bins_centr, firing_rate, color = 'b', width = bbin)
 
 ax2.set_title('PSTH (Post Stimulus Time Histogram', fontsize=fsz)
 ax2.set_ylabel('Firing rate (spikes/sec) \n (spike number divided by 10msec)', fontsize=fsz)

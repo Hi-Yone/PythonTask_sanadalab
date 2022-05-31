@@ -32,22 +32,15 @@ passed_idx = np.where((yy>=threshold) & (yy_prev<threshold))
 # to visualize selected elements, flag on
 passed_idx = passed_idx[0]
 
-histdata = []       # ヒストグラム用配列
-bin = 20            # binサイズ
-size = len(ttime)   # 長さを取得
-i = 0               # indexの初期化
-'''
-ttimeの長さを超えない間、
-20回ずつpassed_binaryを走査することで、それぞれの区間で閾値を超えた回数をカウントする。
-'''
-while i <= (size-1):
-    countNum = 0                    # カウント用変数の初期化
-    for _ in range(bin):
-        if passed_binary[i] == 1:
-            countNum +=1
-        i += 1
-    histdata.append(countNum * 1000/bin) # Firing rateに合わせて配列の末尾に追加
-ttime_bin20 = np.linspace(-500, 999, int(size / bin))
+# hist用データの生成
+bbin = 20
+xmin = ttime[0]
+xmax = ttime[-1]
+spike_timing = ttime[passed_idx]
+bins_array = np.arange(xmin - bbin, xmax + bbin, bbin)
+HIST, bins_ = np.histogram(spike_timing, bins=bins_array, range=(xmin, xmax))
+bins_centr = [(bins_[i-1]+bins_[i])/2 for i in range(1, len(bins_))]
+firing_rate = HIST/(bbin/1000)
 
 superimpose_x, superimpose_y = [], []
 # ピークポイント±20で切り出す
@@ -85,7 +78,7 @@ ax2 = plt.subplot(mm,nn,2)
 ax2.plot([stimON, stimON], [0, 300],'r--', linewidth = 3)
 ax2.plot([stimOFF, stimOFF], [0, 300],'m--', linewidth = 3)
 # ax2.set_ylim(0, 300)
-ax2.bar(ttime_bin20, histdata, color = 'b', width = 20)
+ax2.bar(bins_centr, firing_rate, color = 'b', width = 20)
 
 ax2.set_title('PSTH (Post Stimulus Time Histogram', fontsize=fsz)
 ax2.set_ylabel('Firing rate (spikes/sec) \n (spike number divided by 10msec)', fontsize=fsz)
