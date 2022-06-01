@@ -8,7 +8,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 fsz = 12
 # load array
 loaded_array = np.load('Task_SPK-2_spike_wave_data_multi.npz')
@@ -23,6 +22,30 @@ spikeID = loaded_array['spikeID']
 spike_timing = loaded_array['spktiming']
 
 threshold_low = 1
+
+# =============================================================================
+# FFT
+# =============================================================================
+def fft_filtering(data, n, dt):
+    F_abs = np.abs(np.fft.fft(data))                       # フーリエ変換の絶対値
+    F_abs_amp = (F_abs/n) * 2                           # 振幅を元の波形サイズに調整
+    F_abs_amp[0] = F_abs_amp[0]/2                       # DC成分を２で割る
+    shifted_F_abs_amp = np.fft.fftshift(F_abs_amp)
+
+    freqs = np.fft.fftfreq(N, dt)                       # 時間軸を周波数に変換する
+    shifted_freq = np.fft.fftshift(freqs)
+    return shifted_freq, shifted_F_abs_amp
+
+sampling_freq = 60                              # サンプリング周波数
+x_time = np.arange(0, 10, 1/sampling_freq)      # データポイント生成
+N = np.size(x_time)                             # データ数
+dt = 1/sampling_freq                            # サンプリング間隔
+
+shifted_freq, shifted_F_abs_amp = fft_filtering(spike_waveform, N, dt)
+
+print(len(shifted_freq))
+print(len(shifted_F_abs_amp))
+
 
 # =============================================================================
 # FILTER RAW DATA by convolution
@@ -47,6 +70,12 @@ plt.subplot(3,1,1)
 plt.plot(ttime,spike_waveform)
 plt.xlabel('time(msec)', fontsize = fsz)
 plt.title('Original spike waveform', fontsize = fsz)
+plt.xlim([0,10])
+
+plt.subplot(3,1,2)
+plt.plot(shifted_freq,shifted_F_abs_amp)
+plt.xlabel('time(msec)', fontsize = fsz)
+plt.title('Frequency spectrum of Original spike waveform', fontsize = fsz)
 plt.xlim([0,10])
 
 plt.subplot(3,2,3)
