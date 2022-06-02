@@ -28,7 +28,6 @@
 #%%
 import numpy as np
 import matplotlib.pyplot as plt
-import math
 
 # ===================================================
 # 関数定義
