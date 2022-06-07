@@ -22,38 +22,19 @@ spk_timing_arr_2 = loaded_array['spk_timing_array_2']
 spikeID = loaded_array['spikeID']
 spike_timing = loaded_array['spktiming']
 
-threshold_high = 6      # 高閾値（青）
-threshold_middle = 3.5    # 中閾値（赤）
-threshold_low = 1       # 小閾値（緑）
+# 閾値の上限と下限をそれぞれ設定
+threshold_highMax = 100         # 高閾値上限（青）
+threshold_highMin = 6           # 高閾値下限（青）
 
-thr_lowArr = np.tile(threshold_low, len(ttime))
-thr_middleArr = np.tile(threshold_middle, len(ttime))
-thr_highArr = np.tile(threshold_high, len(ttime))
+threshold_middleMax = 6         # 中閾値上限（赤）
+threshold_middleMin = 3.5       # 中閾値下限（赤）
 
-# =================================================================
-# 関数定義
-# =================================================================
-'''
-閾値を高い->低いへと順にピーク検出
-ピーク検出したら、一旦その部分を0にする（前後数msecも0にする）
-spike_waveform_filterd_tmp を走査して閾値を超えるttimeのインデックスを取得
-取得したインデックスに対応するspike_waveform_filterd_tmpを0にする。
-同様に閾値を下げていく
-'''
-def find_peak_point(xdata, ydata, threshold, extract_range):
-    ydata_tmp = np.copy(ydata)
-    yy_prev = np.append(ydata_tmp[0],ydata_tmp[0:len(ydata_tmp)-1] )
-    peak_idx = np.where((ydata_tmp>=threshold) & (yy_prev<threshold))   # ピークポイントのインデックスを取得
-    peak_x = xdata[peak_idx]                # ピークポイントのxdataを取得
-    peak_y = np.tile(10, len(peak_x))       # ピークの個数分だけタイルする
+threshold_lowMax = 3.5          # 小閾値上限（緑）
+threshold_lowMin = 1            # 小閾値下限（緑）
 
-    # ピークポイント±○○個で切り出す
-    for ii in peak_idx[0]:
-        low_idx = ii - extract_range            # 左端のインデックスを取得
-        high_idx = ii + extract_range           # 右端のインデックスを取得
-        ydata_tmp[low_idx : high_idx] = 0   # ピークポイントの前後を0にする
-
-    return peak_x, peak_y, ydata_tmp, peak_idx[0]
+thr_highArr = np.tile(threshold_highMin, len(ttime))
+thr_middleArr = np.tile(threshold_middleMin, len(ttime))
+thr_lowArr = np.tile(threshold_lowMin, len(ttime))
 
 # =============================================================================
 # FILTER RAW DATA by convolution
@@ -70,9 +51,32 @@ spike_waveform_filtered = np.convolve(spike_waveform,kfilter, mode='same')
 # find spike timing
 # =============================================================================
 extract_range = 50          # カットする範囲を決める
-peak_high_x, peak_high_y, ydata_high_off, peak_idx_high = find_peak_point(ttime, spike_waveform_filtered, threshold_high, extract_range)
-peak_middle_x, peak_middle_y, ydata_middle_off, peak_idx_middle = find_peak_point(ttime, ydata_high_off, threshold_middle, extract_range)
-peak_low_x, peak_low_y, ydata_low_off, peak_idx_low = find_peak_point(ttime, ydata_middle_off, threshold_low, extract_range)
+spikedata_tmp = np.copy(spike_waveform_filtered)
+yy_prev = np.append(spike_waveform_filtered[0],spike_waveform_filtered[0:len(spike_waveform_filtered)-1])
+
+# 条件分岐でピーク検出
+peak_idx_unit2 = np.where(((spike_waveform_filtered>=threshold_highMin) & (yy_prev<threshold_highMin)) & ((spike_waveform_filtered<=threshold_highMax)))   # ピークポイントのインデックスを取得
+# ピークポイント±○○個で切り出す
+for ii in peak_idx_unit2[0]:
+    low_idx = ii - extract_range            # 左端のインデックスを取得
+    high_idx = ii + extract_range           # 右端のインデックスを取得
+    spikedata_tmp[low_idx : high_idx] = 0   # ピークポイントの前後を0にする
+
+peak_idx_unit0 = np.where(((spikedata_tmp>=threshold_middleMin) & (yy_prev<threshold_middleMin)) & ((spikedata_tmp<=threshold_middleMax)))   # ピークポイントのインデックスを取得
+# ピークポイント±○○個で切り出す
+for ii in peak_idx_unit0[0]:
+    low_idx = ii - extract_range            # 左端のインデックスを取得
+    high_idx = ii + extract_range           # 右端のインデックスを取得
+    spikedata_tmp[low_idx : high_idx] = 0   # ピークポイントの前後を0にする
+    
+peak_idx_unit1 = np.where(((spikedata_tmp>=threshold_lowMin) & (yy_prev<threshold_lowMin)) & ((spikedata_tmp<=threshold_lowMax)))   # ピークポイントのインデックスを取得
+
+peak_x_unit0 = ttime[peak_idx_unit0]                # ピークポイントのttimeを取得
+peak_x_unit1 = ttime[peak_idx_unit1]                # ピークポイントのttimeを取得
+peak_x_unit2 = ttime[peak_idx_unit2]                # ピークポイントのttimeを取得
+peak_y_unit0 = np.tile(10, len(peak_x_unit0))       # ピークの個数分だけタイルする
+peak_y_unit1 = np.tile(10, len(peak_x_unit1))       # ピークの個数分だけタイルする
+peak_y_unit2 = np.tile(10, len(peak_x_unit2))       # ピークの個数分だけタイルする
 
 #----------------------------
 plt.close("all")
@@ -126,17 +130,17 @@ ax2.plot(ttime, thr_highArr, color = 'b', label="detected unit 2")
 ax2.set_ylabel('voltage(V)', fontsize=fsz)
 ax2.set_xlabel('time from STIM ONSET (msec)', fontsize=fsz)
 ax2.set_xlim([ttime[0],ttime[len(ttime)-1]])
-ax2.set_xlim([ttime[0],ttime[len(ttime)-1]])
-ax2.scatter(peak_high_x, peak_high_y, color = 'b', marker = 'x')
-ax2.scatter(peak_middle_x, peak_middle_y, color = 'r', marker = 'x')
-ax2.scatter(peak_low_x, peak_low_y, color = 'g', marker = 'x')
+ax2.set_xlim(97, 100)
+ax2.scatter(peak_x_unit0, peak_y_unit0, color = 'b', marker = 'x')
+ax2.scatter(peak_x_unit1, peak_y_unit1, color = 'r', marker = 'x')
+ax2.scatter(peak_x_unit2, peak_y_unit2, color = 'g', marker = 'x')
 
 spk_timing_y = np.ones(len(spike_timing))*11  
 
 ax2.plot(spike_timing[select_spk0], spk_timing_y[select_spk0],'rv',label = 'spike #0')
 ax2.plot(spike_timing[select_spk1], spk_timing_y[select_spk1],'g^',label = 'spike #1')
 ax2.plot(spike_timing[select_spk2], spk_timing_y[select_spk2],'bs',label = 'spike #2')
-ax2.legend(loc='upper right', fontsize = 6)
+# ax2.legend(loc='upper right', fontsize = 6)
 ax2.set_yticks(np.arange(-10, 16, 2.5))
 
 ax2.grid()
@@ -152,24 +156,24 @@ ax3.grid()
 
 normalized_time = np.linspace(-0.5, 0.75, extract_range*2)
 
-for ii in peak_idx_middle:
+for ii in peak_idx_unit0[0]:
     low_idx = ii - extract_range+10            # 左端のインデックスを取得
     high_idx = ii + extract_range+10           # 右端のインデックスを取得
     ax3.plot(normalized_time, spike_waveform_filtered[low_idx : high_idx], color='r')
 
-for ii in peak_idx_low:
+for ii in peak_idx_unit1[0]:
     low_idx = ii - extract_range+10            # 左端のインデックスを取得
     high_idx = ii + extract_range+10           # 右端のインデックスを取得
     ax3.plot(normalized_time, spike_waveform_filtered[low_idx : high_idx], color='g')
 
-for ii in peak_idx_high:
+for ii in peak_idx_unit2[0]:
     low_idx = ii - extract_range+10            # 左端のインデックスを取得
     high_idx = ii + extract_range+10           # 右端のインデックスを取得
     ax3.plot(normalized_time, spike_waveform_filtered[low_idx : high_idx], color='b')
 
-ax3.plot(normalized_time, np.tile(threshold_high, len(normalized_time)), color='b', linestyle='--')
-ax3.plot(normalized_time, np.tile(threshold_middle, len(normalized_time)), color='r', linestyle='--')
-ax3.plot(normalized_time, np.tile(threshold_low, len(normalized_time)), color='g', linestyle='--')
+ax3.plot(normalized_time, np.tile(threshold_highMin, len(normalized_time)), color='b', linestyle='--')
+ax3.plot(normalized_time, np.tile(threshold_middleMin, len(normalized_time)), color='r', linestyle='--')
+ax3.plot(normalized_time, np.tile(threshold_lowMin, len(normalized_time)), color='g', linestyle='--')
 ax3.plot(normalized_time, np.tile(0, len(normalized_time)), color='r')
 
 yticks = np.arange(-5, 15.1, 5)
