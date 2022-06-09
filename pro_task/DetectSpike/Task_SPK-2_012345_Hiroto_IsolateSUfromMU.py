@@ -51,7 +51,7 @@ def find_peak_point(xdata, ydata, threshold, extract_range):
     for ii in peak_idx[0]:
         low_idx = ii - extract_range            # 左端のインデックスを取得
         high_idx = ii + extract_range           # 右端のインデックスを取得
-        ydata_tmp[low_idx : high_idx] = 0   # ピークポイントの前後を0にする
+        ydata_tmp[low_idx : high_idx] = 0    # ピークポイントの前後を0にする
 
     return peak_x, peak_y, ydata_tmp, peak_idx[0]
 
