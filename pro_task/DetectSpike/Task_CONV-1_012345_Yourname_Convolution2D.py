@@ -15,11 +15,23 @@ def zeropad(imgdata, xmargin, ymargin):
     return imgdata_zpad
 
 #----------------------------------------------------------
-# def myfunc_conv2D(ZZ, kernel):
+# ガウス関数を使ったカーネルを使用する方法
+def myfunc_conv2D(ZZ, kernel):  # ZZ:ガウシアンを計算する関数（x,yを持つ）
+    Ny,Nx = np.shape(ZZ)
+    ZZ_filtered = []
 
-#     return ZZ_filtered
+    for ii in range(Ny):
+        for jj in range(Nx):
+            if (ii == 0 | ii == Ny):
+                ZZ_filtered.append(0)
+            elif (jj == 0 | jj == Nx):
+                ZZ_filtered.append(0)
+            else:
+                ZZ_filtered.append(kernel * ZZ[ii][jj])
+    return ZZ_filtered
 
 #----------------------------------------------------------
+# カーネルそのものをガウス関数とする方法
 # def myfunc_conv2D_2(xx, yy, ZZ, sigma):
 
 #     return ZZ_filtered_2
@@ -38,9 +50,10 @@ posy = 0
 eXX =((XX-posx)/sigma)**2/2
 eYY =((YY-posy)/sigma)**2/2
 # compute 2D gaussian
-ZZ = np.exp(-(eXX+eYY))
-# normalize ZZ
-kernel = ZZ/np.sum(ZZ)
+gauss_func = np.exp(-(eXX+eYY))
+# normalize gauss_func
+kernel = gauss_func/np.sum(gauss_func)
+
 # =============================================================================
 # Load Image data
 # =============================================================================
@@ -49,7 +62,6 @@ ZZ = img_array[:,:,0]
 Ny,Nx = np.shape(ZZ)
 xx = np.arange(0,Nx,1)- np.floor(Nx/2)      # x,y軸を定義する、
 yy = np.arange(0,Ny,1)- np.floor(Ny/2)
-# x, y = メッシュグリッド?
 
 # =============================================================================
 # convolution using spicy. 
@@ -59,7 +71,9 @@ ZZ_filtered_signalconvolve2D = signal.convolve2d(ZZ, kernel, boundary='symm', mo
 # =============================================================================
 # convolution using myfunc
 # =============================================================================
-# ZZ_filtered = myfunc_conv2D(ZZ, kernel)
+ZZ_filtered = myfunc_conv2D(ZZ, kernel)
+print(len(ZZ_filtered[0]), len(ZZ_filtered[1]), len(ZZ_filtered[2]), len(ZZ_filtered[3]))
+print(len(ZZ_filtered))
 
 # =============================================================================
 # convolution 2nd method

@@ -32,9 +32,6 @@ NN0 = len(spk_timing_0)
 NN1 = len(spk_timing_1)
 NN2 = len(spk_timing_2)
 
-#%%
-
-
 # =============================================================================
 # Set function
 # =============================================================================
@@ -77,7 +74,7 @@ nn = 1
 plt.close("all")
 # #_------
 fig_ = plt.figure(figsize=(8,10))
-plt.subplots_adjust(wspace=0.4, hspace=0.6)
+plt.subplots_adjust(wspace=0.4, hspace=0.8)
 # =============================================================================
 # # plot raw data
 # =============================================================================
@@ -94,12 +91,6 @@ ax1.set_xlabel('time (msec)')
 mm = 5
 nn = 2
 
-'''
-ToDo : for文を消して普通にプロットする処理をかく。
-Unit別にCrossCollilationをとる
-ISIをヒストグラム化
-おわり
-'''
 # =============================================================================
 # # Plot cross correlograms
 # =============================================================================
@@ -113,7 +104,6 @@ ax2_top.plot(t_delay_u10,cross_corr_shuffle_u10,'m-')
 yrng_top = [np.min(cross_corr_u10),np.max(cross_corr_u10)*1.1]
 ax2_top.plot([0,0],yrng_top,'k:')
 ax2_top.set_ylim(yrng_top)
-ax2_top.legend()
 
 ax2_mid = plt.subplot(mm,nn,5)
 ax2_mid.set_title('Cross-correlogram, unit#2 - unit#0')
@@ -125,7 +115,6 @@ ax2_mid.plot(t_delay_u20,cross_corr_shuffle_u20,'m-')
 yrng_mid = [np.min(cross_corr_u20),np.max(cross_corr_u20)*1.1]
 ax2_mid.plot([0,0],yrng_mid,'k:')
 ax2_mid.set_ylim(yrng_mid)
-ax2_mid.legend()
 
 ax2_bottom = plt.subplot(mm,nn,7)
 ax2_bottom.set_title('Cross-correlogram, unit#2 - unit#1')
@@ -137,7 +126,6 @@ ax2_bottom.plot(t_delay_u21,cross_corr_shuffle_u21,'m-')
 yrng_bottom = [np.min(cross_corr_u21),np.max(cross_corr_u21)*1.1]
 ax2_bottom.plot([0,0],yrng_bottom,'k:')
 ax2_bottom.set_ylim(yrng_bottom)
-ax2_bottom.legend()
 
 # # =============================================================================
 # # # plot cross correlogram (shuffled CC is subtructed)
@@ -152,7 +140,6 @@ ax3_top.plot(t_delay_u10,diff_CC_top)
 yrng_top = [np.min(diff_CC_top),np.max(diff_CC_top)*1.1]
 ax3_top.set_ylim(yrng_top)
 ax3_top.plot([0,0],yrng_top,'k:')
-ax3_top.legend()
 
 
 ax3_mid = plt.subplot(mm,nn,6)
@@ -165,7 +152,6 @@ ax3_mid.plot(t_delay_u20,diff_CC_mid)
 yrng_mid = [0 ,np.max(diff_CC_mid)*1.1]
 ax3_mid.set_ylim(yrng_mid)
 ax3_mid.plot([0,0],yrng_mid,'k:')
-ax3_mid.legend()
 
 ax3_bottom = plt.subplot(mm,nn,8)
 diff_CC_bottom = cross_corr_u21 - cross_corr_shuffle_u21
@@ -177,15 +163,21 @@ ax3_bottom.plot(t_delay_u21,diff_CC_bottom)
 yrng_bottom = [np.min(diff_CC_bottom),np.max(diff_CC_bottom)*1.1]
 ax3_bottom.set_ylim(yrng_bottom)
 ax3_bottom.plot([0,0],yrng_bottom,'k:')
-ax3_bottom.legend()
 
 # =============================================================================
 # # plot Inter spike interval
 # =============================================================================
 mm = 5
 nn = 3
-time_bin = 0.5
-hist_bin = 100
+time_bin = 0.5 
+
+x0_hist, _x0_bins = np.histogram(ISI_u0, bins = int(10/time_bin), range = (0, 10))
+x1_hist, _x1_bins = np.histogram(ISI_u1, bins = int(10/time_bin), range = (0, 10))
+x2_hist, _x2_bins = np.histogram(ISI_u2, bins = int(10/time_bin), range = (0, 10))
+
+new_x0_bins = [(_x0_bins[i-1]+_x0_bins[i])/2 for i in range(1, len(_x0_bins))]
+new_x1_bins = [(_x1_bins[i-1]+_x1_bins[i])/2 for i in range(1, len(_x1_bins))]
+new_x2_bins = [(_x2_bins[i-1]+_x2_bins[i])/2 for i in range(1, len(_x2_bins))]
 
 ax4_left = plt.subplot(mm,nn,13)
 ax4_left.set_title('ISI histogram, unit #0')
@@ -193,7 +185,7 @@ ax4_left.set_xlabel('InterSpikeInterval,ISI (msec)')
 ax4_left.set_xticks([0, 5, 10])
 ax4_left.set_xlim([0,10])
 ax4_left.plot([refractory_period, refractory_period],[0,8],'m--')
-ax4_left.hist(ISI_u0, bins=hist_bin, color="r")
+ax4_left.bar(new_x0_bins, x0_hist, width=0.5, color = 'r')
 
 ax4_center = plt.subplot(mm,nn,14)
 ax4_center.set_title('ISI histogram, unit #1')
@@ -201,7 +193,7 @@ ax4_center.set_xlabel('InterSpikeInterval,ISI (msec)')
 ax4_center.set_xticks([0, 5, 10])
 ax4_center.set_xlim([0,10])
 ax4_center.plot([refractory_period, refractory_period],[0,8],'m--')
-ax4_center.hist(ISI_u1, bins=hist_bin, color="g")
+ax4_center.bar(new_x1_bins, x1_hist, width=0.5, color = 'g')
 
 ax4_right = plt.subplot(mm,nn,15)
 ax4_right.set_title('ISI histogram, unit #2')
@@ -209,7 +201,7 @@ ax4_right.set_xlabel('InterSpikeInterval,ISI (msec)')
 ax4_right.set_xticks([0, 5, 10])
 ax4_right.set_xlim([0,10])
 ax4_right.plot([refractory_period, refractory_period],[0,8],'m--')
-ax4_right.hist(ISI_u2, bins=hist_bin, color="b")
+ax4_right.bar(new_x2_bins, x2_hist, width=0.5, color = 'b')
 
 plt.tight_layout()
 plt.show
