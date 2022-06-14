@@ -73,7 +73,8 @@ kernel = np.array(gauss_func/np.sum(gauss_func))
 # =============================================================================
 # Load Image data
 # =============================================================================
-img_array=plt.imread("ImageData.png")
+# img_array=plt.imread("ImageData.png")
+img_array=plt.imread("Dekachu.png")
 ZZ = img_array[:,:,0]
 Ny,Nx = np.shape(ZZ)
 xx = np.arange(0,Nx,1) - np.floor(Nx/2)      # x,y軸を定義する、
