@@ -21,9 +21,9 @@ def myfunc_conv2D(ZZ, kernel):
     for ii in range(Ny):
         for jj in range(Nx):
             if (ii<filterable_limit) or (ii>Ny-filterable_limit):   # 上下端は0埋め
-                ZZ_filtered[ii][jj] = 0
+                ZZ_filtered[ii][jj] = ZZ_[ii][jj]
             elif (jj<filterable_limit) or (jj>Nx-filterable_limit): # 左右端は0埋め
-                ZZ_filtered[ii][jj] = 0
+                ZZ_filtered[ii][jj] = ZZ_[ii][jj]
             else:
                 # フィルタリングする部分とその周辺を 5*5 の配列で切り出す -> 上下左右±2の範囲
                 # きちんとndarrayに直しておく
@@ -77,8 +77,7 @@ if  __name__ == "__main__":
     # =============================================================================
     # Load Image data
     # =============================================================================
-    # img_array=plt.imread("ImageData.png")
-    img_array=plt.imread("Dekachu.png")
+    img_array=plt.imread("ImageData.png")
     ZZ = img_array[:,:,0]
     Ny,Nx = np.shape(ZZ)
     xx = np.arange(0,Nx,1) - np.floor(Nx/2)      # x,y軸を定義する、
@@ -102,7 +101,7 @@ if  __name__ == "__main__":
     # =============================================================================
     # Plot data
     # =============================================================================
-    fig_ = plt.figure(figsize=(8,10))
+    fig_ = plt.figure(figsize=(16,20))
     plt.subplots_adjust(wspace=0.4, hspace=0.6)
 
     # =============================================================================
@@ -115,19 +114,19 @@ if  __name__ == "__main__":
     # B: show original data 
     # =============================================================================
     plt.subplot(3,3,2)
-    plt.imshow(ZZ)
+    plt.imshow(ZZ, "gray")
     plt.ylabel('y position'); plt.xlabel('x position'); plt.title('B:2D image data')
     # =============================================================================
     # C: show convolution results, signal
     # =============================================================================
     plt.subplot(3,3,3)
-    plt.imshow(ZZ_filtered_signalconvolve2D)
+    plt.imshow(ZZ_filtered_signalconvolve2D, "gray")
     plt.ylabel('y position'); plt.xlabel('x position'); plt.title('C:2D convolution result \n using Signal')
     # =============================================================================
     # D: show your own convolution result, and E: difference from C
     # =============================================================================
     plt.subplot(3,2,3)
-    plt.imshow(ZZ_filtered)
+    plt.imshow(ZZ_filtered, "gray")
     plt.ylabel('y position'); plt.xlabel('x position'); plt.title('D:2D convolution result \n using myfunc_conv2D')
     plt.subplot(3,2,4)
     plt.plot(ZZ_filtered - ZZ_filtered_signalconvolve2D); 
@@ -136,7 +135,7 @@ if  __name__ == "__main__":
     # F: show your own convolution result, and G: difference from C
     # =============================================================================
     plt.subplot(3,2,5)
-    plt.imshow(ZZ_filtered_2)
+    plt.imshow(ZZ_filtered_2, "gray")
     plt.ylabel('y position'); plt.xlabel('x position'); plt.title('F: 2D convolution result \n using myfunc_conv2D_2')
     plt.subplot(3,2,6)
     plt.plot(ZZ_filtered_2 - ZZ_filtered_signalconvolve2D)

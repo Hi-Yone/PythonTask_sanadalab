@@ -187,3 +187,116 @@ if __name__ == '__main__':
     
 
 # %%
+# -*- coding: utf-8 -*-
+# =============================================================================
+# Example code of Task02-1 Neural Image
+# For excercise class 2021
+# coded by Taka Sanada, 6/13/2021
+# =============================================================================
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import signal
+import matplotlib.image as img
+
+def Generate_Gauss_Kernel(xx, yy, posx, posy, sigma):
+    XX, YY = np.meshgrid(xx, yy)
+    eXX =((XX-posx)/sigma)**2/2
+    eYY =((YY-posy)/sigma)**2/2
+    # compute 2D gaussian
+    ZZ = np.exp(-(eXX+eYY))
+    # normalize ZZ
+    kernel = ZZ/np.sum(ZZ)
+    return kernel
+
+plt.close("all")
+# =============================================================================
+# Load Image data
+# =============================================================================
+filename = "wally_img"
+# filename = "char_img"
+# filename = "text_img"
+img_array=plt.imread("./../images_forConv/" + filename + ".png")
+
+ZZ = img_array[:,:,0]
+Ny,Nx = np.shape(ZZ)
+xx = np.linspace(-50,50,Nx)
+incr_ = xx[1]-xx[0]
+yy = np.arange(0,Ny,1)*incr_
+yy = yy - max(yy)/2
+xmax = max(np.abs(xx))
+
+# =============================================================================
+# Generate kernel
+# =============================================================================
+x = np.append(np.flip(-np.arange(incr_,5, incr_)), np.arange(0,5, incr_))
+y = np.append(np.flip(-np.arange(incr_,5, incr_)), np.arange(0,5, incr_))
+XX, YY = np.meshgrid(x, y)
+sigma = 0.75
+posx = 0 # set x position and y position independently
+posy = 0
+eXX =((XX-posx)/sigma)**2/2
+eYY =((YY-posy)/sigma)**2/2
+# compute 2D gaussian
+ZZ = np.exp(-(eXX+eYY))
+# normalize ZZ
+kernel = ZZ/np.sum(ZZ)
+kernel2 = np.tile(kernel,[3,1,1])
+
+# =============================================================================
+# convolution using spicy. 
+# =============================================================================
+temp = np.shape(img_array)
+ZZ_filtered_signalconvolve2D = np.zeros(np.shape(img_array))
+for ii in range(temp[2]):
+    ZZ_filtered_signalconvolve2D[:,:,ii] = signal.convolve2d(img_array[:,:,ii], kernel, boundary='symm', mode='same')
+
+# =============================================================================
+# convolution 2nd method
+# =============================================================================
+ZZ_filtered_2 = np.zeros(np.shape(img_array))
+    
+# =============================================================================
+# convolution 3nd method
+# =============================================================================
+ZZ_filtered_3 = np.zeros(np.shape(img_array))
+    
+# =============================================================================
+# Plot data
+# =============================================================================
+fig_ = plt.figure(figsize=(12,8))
+plt.subplots_adjust(wspace=0.4, hspace=0.6)
+# =============================================================================
+# A: Plot kernel
+# =============================================================================
+plt.subplot(3,3,1)
+plt.imshow(kernel, extent=[-5,5,-5,5])
+plt.ylabel('y position'); plt.xlabel('x position'); plt.title('A:Gaussian Kernel')
+# =============================================================================
+# B: show original data 
+# =============================================================================
+plt.subplot(3,3,2)
+plt.imshow(img_array, extent=[min(xx),max(xx),min(yy),max(yy)])
+plt.ylabel('y position'); plt.xlabel('x position'); plt.title('B:2D image data')
+# =============================================================================
+# C: show convolution results, signal
+# =============================================================================
+plt.subplot(3,3,4)
+plt.imshow(ZZ_filtered_signalconvolve2D, extent=[min(xx),max(xx),min(yy),max(yy)])
+plt.ylabel('y position'); plt.xlabel('x position'); plt.title('C:2D convolution result \n using Signal')
+# =============================================================================
+# F: show your own convolution result, and G: difference from C
+# =============================================================================
+plt.subplot(3,3,5)
+plt.ylabel('y position'); plt.xlabel('x position'); plt.title('D: 2D convolution result \n using myfunc_conv2D_2')
+# =============================================================================
+# Neural Image
+# =============================================================================
+plt.subplot(3,3,6)
+plt.ylabel('y position'); plt.xlabel('x position'); plt.title('E: Neural Image \n using myfunc_conv2D_3')
+
+plt.tight_layout()
+plt.show()
+# save data
+# plt.savefig("Task_CONV-2_NeuralImage_1-012345_Yourname_" + filename + ".pdf")
+
+# %%
