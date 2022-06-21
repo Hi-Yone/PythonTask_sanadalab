@@ -114,19 +114,19 @@ if  __name__ == "__main__":
     # B: show original data 
     # =============================================================================
     plt.subplot(3,3,2)
-    plt.imshow(ZZ, "gray")
+    plt.imshow(ZZ)
     plt.ylabel('y position'); plt.xlabel('x position'); plt.title('B:2D image data')
     # =============================================================================
     # C: show convolution results, signal
     # =============================================================================
     plt.subplot(3,3,3)
-    plt.imshow(ZZ_filtered_signalconvolve2D, "gray")
+    plt.imshow(ZZ_filtered_signalconvolve2D)
     plt.ylabel('y position'); plt.xlabel('x position'); plt.title('C:2D convolution result \n using Signal')
     # =============================================================================
     # D: show your own convolution result, and E: difference from C
     # =============================================================================
     plt.subplot(3,2,3)
-    plt.imshow(ZZ_filtered, "gray")
+    plt.imshow(ZZ_filtered)
     plt.ylabel('y position'); plt.xlabel('x position'); plt.title('D:2D convolution result \n using myfunc_conv2D')
     plt.subplot(3,2,4)
     plt.plot(ZZ_filtered - ZZ_filtered_signalconvolve2D); 
@@ -135,7 +135,7 @@ if  __name__ == "__main__":
     # F: show your own convolution result, and G: difference from C
     # =============================================================================
     plt.subplot(3,2,5)
-    plt.imshow(ZZ_filtered_2, "gray")
+    plt.imshow(ZZ_filtered_2)
     plt.ylabel('y position'); plt.xlabel('x position'); plt.title('F: 2D convolution result \n using myfunc_conv2D_2')
     plt.subplot(3,2,6)
     plt.plot(ZZ_filtered_2 - ZZ_filtered_signalconvolve2D)

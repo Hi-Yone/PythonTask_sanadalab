@@ -55,7 +55,7 @@ def myconv2D_2(ZZ, kernel):
             else:
                 # フィルタリングする部分とその周辺を 5*5 の配列で切り出す -> 上下左右±2の範囲
                 # きちんとndarrayに直しておく
-                tmp_arr = np.array([[ZZ_[ii+mm][jj+ll] for ll in range(-4, 5)] for mm in range(-4, 5)])
+                tmp_arr = np.array([[ZZ_[ii+mm][jj+ll] for ll in range(-10, 11)] for mm in range(-10, 11)])
                 ZZ_filtered[ii][jj] = sum(sum(tmp_arr*kernel))          # 積和を取る
 
     return ZZ_filtered
@@ -64,9 +64,9 @@ plt.close("all")
 # =============================================================================
 # Load Image data
 # =============================================================================
-filename = "wally_img"
+# filename = "wally_img"
 # filename = "char_img"
-# filename = "text_img"
+filename = "text_img"
 img_array=plt.imread("./images_forConv/" + filename + ".png")
 
 ZZ = img_array[:,:,0]
@@ -109,12 +109,6 @@ ZZ_filtered_2 = np.zeros(np.shape(img_array))
 for ii in range(temp[2]):
     ZZ_filtered_2[:,:,ii] = myfunc_conv2D(img_array[:,:,ii], kernel)    # 各色チャネルにカーネルをかける必要あり
 
-# =============================================================================
-# convolution 3nd method
-# =============================================================================
-ZZ_filtered_3 = np.zeros(np.shape(img_array))
-for ii in range(temp[2]):
-    ZZ_filtered_3[:,:,ii] = myconv2D_2(img_array[:,:,ii], kernel) 
 
 
 # =============================================================================
@@ -125,37 +119,42 @@ plt.subplots_adjust(wspace=0.4, hspace=0.6)
 # =============================================================================
 # A: Plot kernel
 # =============================================================================
-plt.subplot(3,3,1)
+plt.subplot(2,2,1)
 plt.imshow(kernel, extent=[-5,5,-5,5])
 plt.ylabel('y position'); plt.xlabel('x position'); plt.title('A:Gaussian Kernel')
 # =============================================================================
 # B: show original data 
 # =============================================================================
-plt.subplot(3,3,2)
+plt.subplot(2,2,2)
 plt.imshow(img_array, extent=[min(xx),max(xx),min(yy),max(yy)])
 plt.ylabel('y position'); plt.xlabel('x position'); plt.title('B:2D image data')
 # =============================================================================
 # C: show convolution results, signal
 # =============================================================================
-plt.subplot(3,3,4)
+plt.subplot(2,2,3)
 plt.imshow(ZZ_filtered_signalconvolve2D, extent=[min(xx),max(xx),min(yy),max(yy)])
 plt.ylabel('y position'); plt.xlabel('x position'); plt.title('C:2D convolution result \n using Signal')
 # =============================================================================
 # F: show your own convolution result, and G: difference from C
 # =============================================================================
-plt.subplot(3,3,5)
+plt.subplot(2,2,4)
 plt.imshow(ZZ_filtered_2, extent=[min(xx),max(xx),min(yy),max(yy)])
 plt.ylabel('y position'); plt.xlabel('x position'); plt.title('D: 2D convolution result \n using myfunc_conv2D_2')
+
+
+
 # =============================================================================
-# Neural Image
+# 前回自分が作った関数が正常に動作しているか確認
 # =============================================================================
-plt.subplot(3,3,6)
-plt.imshow(ZZ_filtered_3, extent=[min(xx),max(xx),min(yy),max(yy)])
-plt.ylabel('y position'); plt.xlabel('x position'); plt.title('E: Neural Image \n using myfunc_conv2D_3')
+# ZZ_filtered_3 = np.zeros(np.shape(img_array))
+# for ii in range(temp[2]):
+#     ZZ_filtered_3[:,:,ii] = myconv2D_2(img_array[:,:,ii], kernel) 
+
+# plt.subplot(2,2,6)
+# plt.imshow(ZZ_filtered_3, extent=[min(xx),max(xx),min(yy),max(yy)])
+# plt.ylabel('y position'); plt.xlabel('x position'); plt.title('E: Neural Image \n using myfunc_conv2D_3')
 
 plt.tight_layout()
 plt.show()
-# save data
-# plt.savefig("Task_CONV-2_NeuralImage_1-012345_Yourname_" + filename + ".pdf")
 
 # %%
