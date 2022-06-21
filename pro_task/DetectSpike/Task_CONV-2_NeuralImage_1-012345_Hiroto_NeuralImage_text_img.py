@@ -64,9 +64,9 @@ plt.close("all")
 # =============================================================================
 # Load Image data
 # =============================================================================
-# filename = "wally_img"
+filename = "wally_img"
 # filename = "char_img"
-filename = "text_img"
+# filename = "text_img"
 img_array=plt.imread("./images_forConv/" + filename + ".png")
 
 ZZ = img_array[:,:,0]
@@ -144,7 +144,7 @@ plt.ylabel('y position'); plt.xlabel('x position'); plt.title('D: 2D convolution
 
 
 # =============================================================================
-# 前回自分が作った関数が正常に動作しているか確認
+# 前回自分が作った関数が正常に動作しているか確認 -> かんぺき
 # =============================================================================
 # ZZ_filtered_3 = np.zeros(np.shape(img_array))
 # for ii in range(temp[2]):
@@ -153,6 +153,7 @@ plt.ylabel('y position'); plt.xlabel('x position'); plt.title('D: 2D convolution
 # plt.subplot(2,2,6)
 # plt.imshow(ZZ_filtered_3, extent=[min(xx),max(xx),min(yy),max(yy)])
 # plt.ylabel('y position'); plt.xlabel('x position'); plt.title('E: Neural Image \n using myfunc_conv2D_3')
+
 
 plt.tight_layout()
 plt.show()

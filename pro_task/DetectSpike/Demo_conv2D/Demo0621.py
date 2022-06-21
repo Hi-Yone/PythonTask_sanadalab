@@ -44,8 +44,12 @@ def myfunc_conv2D_2(xx, yy, ZZ, sigma):
         for jj in range(Nxx):
             posxx = xx[jj]                          # μを決める
             posyy = yy[ii]                          # μを決める
+            eccentricity = np.sqrt(posx**2+posy**2)
+            RFdiam = eccentricity/2+0.5
+            sigma = RFdiam/6
             eXX2 = ((XX2-posxx)/sigma)**2/2         # 指数部分のx
             eYY2 = ((YY2-posyy)/sigma)**2/2         # 指数部分のy
+
             gauss_func2 = 1/ (2*np.pi*sigma**2) * np.exp(-(eXX2 + eYY2))    # ガウス関数を定義
             norm_gauss_func2 = np.array(ZZ_[ii][jj] * gauss_func2/np.sum(gauss_func2))  # ガウス関数との積を取る
             ZZ_filtered_2 += norm_gauss_func2       # 全て足し合わせる
